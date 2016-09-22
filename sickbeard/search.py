@@ -81,6 +81,17 @@ def _downloadResult(result):
             logger.log(u"Error trying to save NZB to black hole: " + ex(e), logger.ERROR)
             newResult = False
     elif resProvider.providerType == "torrent":
+        if result.url.startswith('magnet'):
+            urls, filename = resProvider._makeURL(result)
+            m = re.match(".*urn:btih:(.*)$",result.url)
+            if m:
+               s = "magnet:?xt=urn:btih:%s" % m.group(1)
+               response = "d10:magnet-uri%d:%se" %(len(s),s)
+               open(filename,"w").write(response)
+               logger.log(u"Anthony in generic.py wrote %s ='%s'" % (filename,response))
+               return True
+            else:
+               logger.log(u"Anthony in generic.py failed to match in '%s'"% result.url)
         newResult = resProvider.downloadResult(result)
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
